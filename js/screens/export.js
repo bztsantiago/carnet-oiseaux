@@ -1,4 +1,4 @@
-// Exporter : fichier Excel de toutes les balades, à télécharger ou partager.
+// Exporter : fichier Excel de toutes les balades, à télécharger.
 import { h, toast, fmtDate, plural } from '../ui/components.js';
 import * as repo from '../db/repo.js';
 import { buildWorkbook } from '../services/export-xlsx.js';
@@ -37,27 +37,11 @@ export async function render(main) {
     },
   }, 'Exporter en Excel');
 
-  const canShare = (() => {
-    try { return !!navigator.canShare?.({ files: [new File([''], 'test.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })] }); } catch { return false; }
-  })();
-  const shareBtn = canShare ? h('button', {
-    class: 'btn btn-ghost', type: 'button',
-    onclick: async () => {
-      const { blob, count, name } = make();
-      try {
-        await navigator.share({ files: [new File([blob], name, { type: blob.type })], title: 'Observations ornithologiques' });
-        await done(count);
-      } catch (err) {
-        if (err.name !== 'AbortError') toast('Le partage n’a pas fonctionné. Utilise « Exporter en Excel ».');
-      }
-    },
-  }, 'Partager le fichier (mail, Drive…)') : null;
-
   main.append(
     h('h1', {}, 'Exporter'),
     h('p', {}, `${plural(balades.length, 'balade', 'balades')} · ${plural(obs.length, 'observation', 'observations')}`),
     h('p', { class: 'muted small' }, 'Une ligne par observation, avec les colonnes de ton classeur : Date, Lieu, Espèce, Pays, Nom scientifique, Remarques, Continent, puis l’heure.'),
-    h('div', { class: 'stack', style: 'margin:18px 0' }, downloadBtn, shareBtn),
+    h('div', { class: 'stack', style: 'margin:18px 0' }, downloadBtn),
     status,
     h('div', { class: 'card', style: 'margin-top:18px' },
       h('p', { class: 'small' }, 'Tes données ne sont enregistrées que sur ce téléphone. Exporte de temps en temps pour garder une copie de sauvegarde.')),

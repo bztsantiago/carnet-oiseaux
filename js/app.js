@@ -6,14 +6,14 @@ import * as walk from './screens/walk.js';
 import * as startScreen from './screens/start.js';
 import * as history from './screens/history.js';
 import * as balade from './screens/balade.js';
-import * as lieux from './screens/lieux.js';
+import * as stats from './screens/stats.js';
 import * as exportScreen from './screens/export.js';
 
 route(/^#\/?$/, walk.render, 'balade');
 route(/^#\/demarrer$/, startScreen.render, 'balade');
 route(/^#\/historique$/, history.render, 'historique');
 route(/^#\/balade\/([^/]+)$/, balade.render, 'historique');
-route(/^#\/lieux$/, lieux.render, 'lieux');
+route(/^#\/stats$/, stats.render, 'stats');
 route(/^#\/exporter$/, exportScreen.render, 'exporter');
 
 // Masque les onglets quand le clavier est ouvert, pour garder la place au panneau d'ajout.
@@ -37,7 +37,7 @@ function registerServiceWorker() {
   try {
     const imported = await ensureSeed();
     start();
-    if (imported) toast('Tes observations historiques ont été importées.');
+    if (imported) toast('Les observations de base ont été mises à jour.');
   } catch (err) {
     console.error(err);
     main.replaceChildren(h('h1', {}, 'Impossible de démarrer'), h('p', {}, err.message));

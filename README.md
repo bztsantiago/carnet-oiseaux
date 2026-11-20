@@ -11,12 +11,12 @@ Toutes les données sont enregistrées **en minuscules et sans accents**
 
 | Onglet | Rôle |
 |---|---|
-| Balade | Démarrer une balade, puis noter les espèces : pastilles d'espèces probables (selon le lieu et la saison), recherche avec autocomplétion, bouton « Entendu », annulation |
+| Balade | Démarrer une balade (et créer un nouveau lieu si besoin), puis noter les espèces : recherche avec autocomplétion, bouton « Entendu » |
 | Historique | Toutes les balades ; dans une balade : corriger un nom, basculer vu / entendu, supprimer, ajouter une espèce oubliée |
-| Lieux | Lieux connus et ajout d'un nouveau lieu (un lieu peut aussi être créé en démarrant une balade) |
-| Exporter | Fichier `.xlsx` de toutes les balades, une ligne par observation, à télécharger ou partager |
+| Stats | Courbe des espèces découvertes, espèces les plus fréquentes, diversité par mois, lieux les plus riches. Calculées sur le téléphone, uniquement quand on touche « Actualiser » |
+| Exporter | Fichier `.xlsx` de toutes les balades, une ligne par observation |
 
-Au premier lancement, les 73 balades et 1 027 observations historiques (`data/seed.json`) sont importées.
+Au premier lancement, les 79 balades et 1 171 observations de base (`data/seed.json`) sont importées.
 
 ## Tester sur l'ordinateur
 
@@ -46,9 +46,10 @@ Désinstaller l'appli ou effacer les données de Chrome pour ce site les supprim
 3. Si un fichier a été ajouté ou supprimé : `node tools/check-assets.mjs` vérifie la liste mise en cache.
 4. Envoyer sur GitHub. À la prochaine ouverture en ligne, l'appli propose « Recharger ».
 
-Pour régénérer les données initiales depuis un CSV `date,lieu,pays,espece,entendu` :
-`node tools/build-seed.mjs data/source/observations_nettoyees.csv`, puis augmenter `SEED_VERSION`
-dans `js/db/seed.js` (seules les lignes « seed-… » sont réécrites).
+Pour remplacer les observations de base par un fichier Excel au format de l'export de l'appli :
+`node tools/build-seed.mjs data/source/observations.xlsx`, puis augmenter `SEED_VERSION`
+dans `js/db/seed.js`. Sur le téléphone, les anciennes lignes de base sont remplacées ; ce qui a
+été saisi dans l'appli est gardé, sauf ce que le fichier contient déjà (même date, lieu et espèce).
 
 ## Organisation du code
 
@@ -63,7 +64,7 @@ js/screens/   un fichier par écran
 js/ui/        composants (panneau d'ajout rapide, ligne d'observation, champs de lieu)
 js/lib/       xlsx-writer.js (fichier Excel sans librairie externe)
 js/services/  export-xlsx.js, stats.js, sync/
-tools/        serve, build-seed, check-assets
+tools/        serve, build-seed (+ xlsx-read), check-assets
 ```
 
 ### Modèle de données
@@ -79,9 +80,9 @@ Chaque enregistrement a aussi `id` (UUID créé sur l'appareil), `createdAt`, `u
 
 ### Statistiques
 
-`js/services/stats.js` contient déjà des fonctions pures (accumulation des espèces,
-fréquence, diversité par mois, bilan par lieu), avec les mêmes définitions que le tableau de bord.
-Il suffira d'ajouter un écran `js/screens/stats.js`, une route dans `app.js` et un onglet.
+Les calculs sont des fonctions pures dans `js/services/stats.js` ; l'écran `js/screens/stats.js`
+garde le dernier résultat dans la base (`meta.statsSnapshot`). Pour un nouveau graphique :
+ajouter le chiffre dans `compute()` et son affichage dans `view()`.
 
 ### Synchronisation Supabase
 

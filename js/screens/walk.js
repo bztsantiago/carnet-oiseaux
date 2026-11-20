@@ -36,7 +36,7 @@ async function renderActive(main, b) {
 
   const meta = h('p', { class: 'muted small' });
   const list = h('ul', { class: 'list' });
-  const empty = h('p', { class: 'muted' }, 'Touche une espèce en bas de l’écran, ou tape son nom.');
+  const empty = h('p', { class: 'muted' }, 'Tape le nom d’une espèce en bas de l’écran.');
 
   async function refresh() {
     const obs = await repo.observationsOf(b.id);
