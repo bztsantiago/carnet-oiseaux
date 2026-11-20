@@ -13,7 +13,7 @@ Toutes les données sont enregistrées **en minuscules et sans accents**
 |---|---|
 | Balade | Démarrer une balade (et créer un nouveau lieu si besoin), puis noter les espèces : recherche avec autocomplétion, bouton « Entendu » |
 | Historique | Toutes les balades ; dans une balade : corriger un nom, basculer vu / entendu, supprimer, ajouter une espèce oubliée |
-| Stats | Courbe des espèces découvertes, espèces les plus fréquentes, diversité par mois, lieux les plus riches. Calculées sur le téléphone, uniquement quand on touche « Actualiser » |
+| Stats | Courbe des espèces découvertes, espèces les plus fréquentes, diversité par mois, calendrier des 20 espèces les plus courantes, lieux les plus riches. Calculées sur le téléphone, uniquement quand on touche « Actualiser » |
 | Exporter | Fichier `.xlsx` de toutes les balades, une ligne par observation |
 
 Au premier lancement, les 79 balades et 1 171 observations de base (`data/seed.json`) sont importées.

@@ -2,7 +2,7 @@
 // À CHAQUE MODIFICATION D'UN FICHIER, augmenter VERSION : les téléphones
 // téléchargent alors la nouvelle version au prochain lancement en ligne.
 // tools/check-assets.mjs vérifie que la liste ASSETS est complète.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = `carnet-${VERSION}`;
 
 const ASSETS = [

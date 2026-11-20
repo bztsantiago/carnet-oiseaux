@@ -3,7 +3,7 @@
 // base (meta « statsSnapshot ») et n'est refait que sur le bouton « Actualiser ».
 import { h, toast, fmtDate, fmtTime, plural } from '../ui/components.js';
 import * as repo from '../db/repo.js';
-import { accumulation, frequenceEspeces, diversiteParMois, bilanParLieu } from '../services/stats.js';
+import { accumulation, frequenceEspeces, diversiteParMois, bilanParLieu, calendrierEspeces } from '../services/stats.js';
 
 const KEY = 'statsSnapshot';
 const SVG = 'http://www.w3.org/2000/svg';
@@ -26,6 +26,10 @@ async function compute() {
     top: freq.slice(0, 15).map((f) => ({ e: f.espece, b: f.balades, t: f.taux })),
     mois: diversiteParMois(balades, obs, { exclurePays: horsEurope }).map((m) => ({ b: m.balades, e: m.especes })),
     horsEurope,
+    cal: (() => {
+      const c = calendrierEspeces(balades, obs, freq.slice(0, 20).map((f) => f.espece), { exclurePays: horsEurope });
+      return { b: c.balades, rows: c.especes.map((r) => ({ e: r.espece, n: r.mois })) };
+    })(),
     lieux: bilanParLieu(balades, obs).slice(0, 10).map((l) => ({ l: l.lieu, p: l.pays, e: l.especes, b: l.balades })),
   };
 }
@@ -93,12 +97,54 @@ function view(s) {
           h('span', { class: 'col-track' }, h('span', { class: 'col-fill', style: `height:${(m.e / moisMax) * 100}%` })),
           h('span', { class: 'col-lab' }, MOIS[i].slice(0, 1).toUpperCase()))))),
 
+    s.cal ? section('Calendrier des 20 espèces les plus courantes',
+      `Part des balades de chaque mois où l’espèce a été notée${s.horsEurope.length ? ' (Europe seulement)' : ''}. Plus la case est foncée, plus l’espèce est régulière ce mois-là. La dernière ligne donne le nombre de balades du mois : un mois avec peu de balades est moins fiable. Touche une case pour le détail.`,
+      calendar(s.cal)) : section('Calendrier des 20 espèces les plus courantes',
+      'Touche « Actualiser les statistiques » pour le calculer.', null),
+
     section('Les lieux les plus riches',
       'Espèces différentes vues à chaque lieu (10 premiers).',
       bars(s.lieux.map((l) => ({ label: l.l, sub: `${l.p} · ${plural(l.b, 'balade', 'balades')}`, value: l.e, text: String(l.e) })))),
 
     h('p', { class: 'muted small' }, `${plural(c.uneFois, 'espèce n’a été vue', 'espèces n’ont été vues')} qu’une seule fois. ${c.observations.toLocaleString('fr-FR')} observations au total.`),
   ];
+}
+
+// Grille espèces × mois, couleur selon la part des balades du mois (une seule teinte).
+function calendar(cal) {
+  const readout = h('p', { class: 'readout small' }, 'Touche une case pour voir le détail.');
+  let selected = null;
+  const level = (p) => (p === 0 ? 0 : p < 0.25 ? 1 : p < 0.5 ? 2 : p < 0.75 ? 3 : 4);
+  const grid = h('div', { class: 'cal', role: 'table', 'aria-label': 'Calendrier des espèces' },
+    h('div', { class: 'cal-row cal-head', role: 'row' }, h('span', { role: 'columnheader' }),
+      ...MOIS.map((m) => h('span', { class: 'cal-m', role: 'columnheader', title: m }, m.slice(0, 1).toUpperCase()))),
+    ...cal.rows.map((r) => h('div', { class: 'cal-row', role: 'row' },
+      h('span', { class: 'cal-name name', role: 'rowheader' }, r.e),
+      ...r.n.map((n, i) => {
+        const total = cal.b[i];
+        const p = total ? n / total : 0;
+        const label = total
+          ? `${r.e}, ${MOIS_LONG[i]} : notée lors de ${n} balade${n > 1 ? 's' : ''} sur ${total} (${Math.round(p * 100)} %)`
+          : `${MOIS_LONG[i]} : aucune balade`;
+        const cell = h('button', {
+          type: 'button', role: 'cell', 'aria-label': label,
+          class: total ? `cal-c l${level(p)}` : 'cal-c none',
+          onclick: () => {
+            selected?.classList.remove('sel');
+            selected = cell; cell.classList.add('sel');
+            readout.replaceChildren(h('b', { class: 'name' }, r.e), ` · ${MOIS_LONG[i]} : `,
+              total ? `notée lors de ${n} balade${n > 1 ? 's' : ''} sur ${total} (${Math.round(p * 100)} %)` : 'aucune balade ce mois-là');
+          },
+        });
+        return cell;
+      }))),
+    h('div', { class: 'cal-row cal-foot', role: 'row' },
+      h('span', { class: 'cal-name', role: 'rowheader' }, 'balades'),
+      ...cal.b.map((n, i) => h('span', { class: 'cal-m', role: 'cell', title: `${MOIS_LONG[i]} : ${n} balade${n > 1 ? 's' : ''}` }, String(n)))));
+  const legend = h('div', { class: 'cal-legend small muted' },
+    h('span', {}, 'Jamais'), ...[0, 1, 2, 3, 4].map((l) => h('span', { class: `cal-c l${l}`, 'aria-hidden': 'true' })), h('span', {}, 'Presque toujours'),
+    h('span', { class: 'cal-c none', 'aria-hidden': 'true', style: 'margin-left:10px' }), h('span', {}, 'Aucune balade'));
+  return h('div', {}, grid, legend, readout);
 }
 
 function section(title, caption, content) {

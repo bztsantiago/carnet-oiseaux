@@ -57,3 +57,21 @@ function groupBy(list, key) {
   list.forEach((x) => { const k = key(x); if (!m.has(k)) m.set(k, []); m.get(k).push(x); });
   return m;
 }
+
+// Calendrier : pour chaque espèce et chaque mois (toutes années confondues), nombre de
+// balades où elle a été notée, à rapporter au nombre de balades de ce mois.
+export function calendrierEspeces(balades, observations, especes, { exclurePays = [] } = {}) {
+  const ok = new Map(balades.filter((b) => !exclurePays.includes(b.pays)).map((b) => [b.id, +b.date.slice(5, 7) - 1]));
+  const parMois = Array(12).fill(0);
+  ok.forEach((m) => { parMois[m] += 1; });
+  const rows = new Map(especes.map((e) => [e, Array(12).fill(0)]));
+  const vu = new Set();
+  observations.forEach((o) => {
+    const m = ok.get(o.baladeId);
+    const row = rows.get(o.espece);
+    if (m == null || !row || vu.has(`${o.baladeId}|${o.espece}`)) return;
+    vu.add(`${o.baladeId}|${o.espece}`);
+    row[m] += 1;
+  });
+  return { balades: parMois, especes: [...rows].map(([espece, mois]) => ({ espece, mois })) };
+}

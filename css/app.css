@@ -226,6 +226,23 @@ body.has-dock .toast { bottom: auto; top: calc(12px + env(safe-area-inset-top, 0
 .col-track { display: flex; align-items: flex-end; width: 100%; max-width: 22px; height: 130px; border-bottom: 1px solid var(--muted); }
 .col-fill { display: block; width: 100%; background: var(--accent); border-radius: 4px 4px 0 0; }
 .col-lab { font-size: .78rem; color: var(--muted); }
+.cal { display: flex; flex-direction: column; gap: 2px; }
+.cal-row { display: grid; grid-template-columns: minmax(0, 36%) repeat(12, 1fr); gap: 2px; align-items: center; }
+.cal-name { font-size: .82rem; line-height: 1.1; padding-right: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-m { text-align: center; font-size: .72rem; color: var(--muted); }
+.cal-foot { margin-top: 4px; }
+.cal-foot .cal-name, .cal-foot .cal-m { color: var(--muted); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.cal-c { display: block; height: 24px; min-width: 0; padding: 0; border: 0; border-radius: 3px; background: var(--line); }
+.cal-c.l0 { background: color-mix(in oklab, var(--accent) 6%, var(--panel)); box-shadow: inset 0 0 0 1px var(--line); }
+.cal-c.l1 { background: color-mix(in oklab, var(--accent) 28%, var(--panel)); }
+.cal-c.l2 { background: color-mix(in oklab, var(--accent) 52%, var(--panel)); }
+.cal-c.l3 { background: color-mix(in oklab, var(--accent) 76%, var(--panel)); }
+.cal-c.l4 { background: var(--accent); }
+.cal-c.none { background: repeating-linear-gradient(45deg, var(--line) 0 2px, transparent 2px 5px); }
+.cal-c.sel { outline: 2px solid var(--amber); outline-offset: 1px; }
+.cal-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.cal-legend .cal-c { width: 18px; height: 14px; }
+.cal-legend span:not(.cal-c) { margin: 0 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   .btn:active { transform: none; }
